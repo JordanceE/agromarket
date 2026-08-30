@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Marija Ilievska', 'email' => 'marija@example.com', 'phone' => '+389 78 555 666', 'location' => 'Kavadarci', 'bio' => 'Grape and almond producer.'],
         ])->map(fn (array $data) => User::firstOrCreate(
             ['email' => $data['email']],
-            [...$data, 'password' => config('seeding.admin_password'), 'role' => 'user', 'email_verified_at' => now()]
+            [...$data, 'password' => config('seeding.user_password'), 'role' => 'user', 'email_verified_at' => now()]
         ));
 
         $categoryDefinitions = [
