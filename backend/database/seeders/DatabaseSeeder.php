@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@agromarket.mk'],
             [
                 'name' => 'AgroMarket Admin',
-                'password' => env('SEED_ADMIN_PASSWORD', 'Admin123!'),
+                'password' => config('seeding.admin_password'),
                 'role' => 'admin',
                 'phone' => '+389 70 000 001',
                 'location' => 'Skopje',
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Marija Ilievska', 'email' => 'marija@example.com', 'phone' => '+389 78 555 666', 'location' => 'Kavadarci', 'bio' => 'Grape and almond producer.'],
         ])->map(fn (array $data) => User::firstOrCreate(
             ['email' => $data['email']],
-            [...$data, 'password' => env('SEED_USER_PASSWORD', 'Password123!'), 'role' => 'user', 'email_verified_at' => now()]
+            [...$data, 'password' => config('seeding.admin_password'), 'role' => 'user', 'email_verified_at' => now()]
         ));
 
         $categoryDefinitions = [
