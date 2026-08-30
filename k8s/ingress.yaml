@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agromarket
+  namespace: agromarket
+  labels:
+    app.kubernetes.io/name: agromarket
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: agromarket.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  name: http
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+

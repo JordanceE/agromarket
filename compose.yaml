@@ -1,0 +1,90 @@
+name: agromarket
+
+services:
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agromarket}
+      POSTGRES_USER: ${POSTGRES_USER:-agromarket}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - agromarket
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    image: agromarket-backend:local
+    restart: unless-stopped
+    environment:
+      APP_NAME: AgroMarket
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:${FRONTEND_PORT:-8080}
+      APP_KEY: ${APP_KEY:-base64:KSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0g=}
+      LOG_CHANNEL: stderr
+      LOG_LEVEL: info
+      DB_CONNECTION: pgsql
+      DB_HOST: database
+      DB_PORT: "5432"
+      DB_DATABASE: ${POSTGRES_DB:-agromarket}
+      DB_USERNAME: ${POSTGRES_USER:-agromarket}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change-me-local-only}
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+      # Safe because this service is only published on host loopback below.
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-*}"
+      SEED_DATABASE: "true"
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin123!}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-Password123!}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - agromarket
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_URL: /api
+    image: agromarket-frontend:local
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - agromarket
+
+volumes:
+  postgres_data:
+
+networks:
+  agromarket:
+    driver: bridge
