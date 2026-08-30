@@ -2,7 +2,14 @@
 .env
 .env.*
 !.env.example
-
+k8s/secret.yaml
+k8s/.secret.env
+auth.json
+.npmrc
+*.pem
+*.key
+*.p12
+*.kubeconfig
 # PHP / Laravel
 backend/vendor/
 backend/.phpunit.cache/

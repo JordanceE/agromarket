@@ -29,7 +29,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: backend
-          image: DOCKERHUB_USERNAME/agromarket-backend:latest
+          image: joce555/agromarket-backend:latest
           imagePullPolicy: Always
           ports:
             - name: http
